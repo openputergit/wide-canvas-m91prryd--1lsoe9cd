@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #2C3E50, #3498DB);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-white mb-4">Plant Disease Detection System</h1>
+            <p class="text-gray-200">Upload a photo of your plant to detect diseases</p>
+        </header>
+
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-xl p-6">
+            <div class="mb-6">
+                <div class="flex items-center justify-center w-full">
+                    <label class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <i class="bi bi-cloud-upload text-4xl text-gray-500 mb-3"></i>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                            <p class="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 5MB)</p>
+                        </div>
+                        <input id="imageUpload" type="file" class="hidden" accept="image/*" />
+                        <img id="preview" class="hidden max-h-64 object-contain" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button id="detectButton" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-400" disabled>
+                    Detect Disease
+                </button>
+            </div>
+
+            <div id="result" class="mt-6 hidden">
+                <h3 class="text-xl font-semibold mb-3">Detection Results:</h3>
+                <div id="resultContent" class="p-4 bg-gray-100 rounded-lg">
+                    <div id="loading" class="text-center hidden">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                        <p class="mt-2 text-gray-600">Analyzing image...</p>
+                    </div>
+                    <div id="resultText" class="text-gray-700"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let model;
+        const imageUpload = document.getElementById('imageUpload');
+        const preview = document.getElementById('preview');
+        const detectButton = document.getElementById('detectButton');
+        const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
+        const resultText = document.getElementById('resultText');
+
+        // Load TensorFlow model
+        async function loadModel() {
+            try {
+                // In a real application, you would load your trained model here
+                // model = await tf.loadLayersModel('path_to_your_model/model.json');
+                console.log('Model loaded successfully');
+            } catch (error) {
+                console.error('Error loading model:', error);
+            }
+        }
+
+        // Initialize
+        loadModel();
+
+        // Handle image upload
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    detectButton.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle drag and drop
+        const dropZone = document.querySelector('label');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('bg-gray-100');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('bg-gray-100');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('bg-gray-100');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                imageUpload.files = e.dataTransfer.files;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    detectButton.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle detection
+        detectButton.addEventListener('click', async () => {
+            result.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            resultText.innerHTML = '';
+
+            // Simulate detection (replace with actual model inference in production)
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                resultText.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="font-semibold text-green-600">Plant appears to be: Tomato</p>
+                        <p class="font-semibold text-red-600">Detected Disease: Early Blight</p>
+                        <p class="mt-4"><strong>Recommendation:</strong></p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Remove affected leaves</li>
+                            <li>Improve air circulation</li>
+                            <li>Apply approved fungicide</li>
+                            <li>Water at the base of the plant</li>
+                        </ul>
+                    </div>
+                `;
+            }, 2000);
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
